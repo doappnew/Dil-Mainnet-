@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Le chemin des pionniers — DIL</title>
 <link rel="preconnect" href="https://sdk.minepi.com">
-<link rel="preconnect" href="https://dil-chat-api.onrender.com">
+<link rel="preconnect" href="https://dil-pioneers-api.onrender.com">
 <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 <style>
 :root{--nuit:#070B24;--nuit2:#1A1A1A;--violet:#D4AF37;--cyan:#22D3EE;--or:#FBBF24;--bg:#F3F5FB;--card:#fff;--ink:#0B1230;--mut:#4a5373;--line:#dde2f0;--ok:#0f9d6b;--ko:#c62f4a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -691,7 +691,7 @@ return `<h1>Mon profil</h1><div class="card" style="display:flex;gap:14px;align-
 <div class="grid2" style="margin-top:14px"><button class="btn bg" onclick="if(confirm('Effacer votre progression sur cet appareil ?')){S.done={};S.quiz={};save();render()}">Effacer ma progression</button><button class="btn bk" onclick="if(confirm('Se déconnecter ?')){S.user=null;S.session=null;S.paid=null;S.level=null;S.preview=false;save();render()}">Se déconnecter</button></div>`}
 
 /* ===== v4 : bleu ciel, pages homogènes, assistant IA ===== */
-const CHAT_API="https://dil-chat-api.onrender.com/api/chat";
+const CHAT_API="https://dil-pioneers-api.onrender.com/api/chat";
 const phead=(i,t,s)=>`<div class="phead"><div class="ico">${i}</div><div><h1>${t}</h1>${s?`<p class="mut">${s}</p>`:""}</div></div>`;
 SVG.chat=ic('<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>');
 NAV[2]=["chat","","Assistant"];
