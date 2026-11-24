@@ -342,6 +342,26 @@ html,body{overflow-x:hidden;max-width:100%}.lesson{max-width:100%;overflow-wrap:
 .lesson details p{margin:0 0 12px!important}
 .lesson .modh{margin:22px 0 4px;padding:10px 14px;border-radius:16px;background:linear-gradient(120deg,#0B1230,#1d2b5e);color:#F6E19A;font-weight:800;letter-spacing:.2px}
 </style>
+<style>
+/* v12 : plans */
+.pl{display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto;padding:14px 16px 28px}
+.pl h1{font-size:28px;line-height:1.15;margin:4px 0 0;letter-spacing:-.02em}
+.plc{border-radius:20px;padding:22px 20px;display:flex;flex-direction:column;gap:12px;position:relative}
+.plc h2{font-size:20px;margin:0;color:inherit}.plc p{margin:0}.pl .lead{margin:0}
+.plf{background:#fff;border:1px solid #d6e9f8}
+.plp b{font-size:30px;letter-spacing:-.02em}.plp small{font-size:13px;opacity:.75;font-weight:500}
+.pll{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:15px;line-height:1.4}
+.pll li{padding-left:22px;position:relative}
+.pll li::before{content:"";position:absolute;left:2px;top:.5em;width:10px;height:6px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg) translateY(-3px);opacity:.8}
+.pls2{margin-left:2px;font-size:14px;opacity:.9}
+.pls{font-size:13px;opacity:.75;margin:0}
+.plp2{background:linear-gradient(160deg,#17130a 0%,#2a2210 55%,#3b2f12 100%);color:#fbf3d6;border:1px solid #D4AF37;box-shadow:0 18px 40px -18px rgba(212,175,55,.55)}
+.plp2 .mut,.plp2 .pls{color:#e9dca8}
+.plp2 .pll li::before{color:#E2B93B}
+.plb{align-self:flex-start;background:linear-gradient(135deg,#FFF3B8,#D4AF37);color:#2a2210;font-size:12.5px;font-weight:700;padding:5px 11px;border-radius:999px}
+.pl-lock{text-align:center;padding:24px 18px}
+.pl button:focus-visible{outline:3px solid #D4AF37;outline-offset:2px}
+</style>
 </head>
 <body>
 <header><div class="bar">
@@ -638,9 +658,9 @@ async function piLogin(){const e=$("#gerr"),b=$("#gbtn");const say=m=>{if(e)e.te
  catch(err){fail("Vérification impossible. Vérifiez votre connexion, puis réessayez.")}}
 
 function levelView(){const cur=S.tmp||S.level||"";
-return `<div class="gate"><span class="tag gold" style="align-self:flex-start">Étape 2 sur 2</span><h1 style="margin-top:14px">Bonjour ${esc(S.user.name)}</h1><p class="lead">Quel est votre niveau en crypto ? Nous adaptons vos recommandations.</p><div style="margin-top:14px">`+
+return `<div class="gate"><span class="tag gold" style="align-self:flex-start">Étape 2 sur 3</span><h1 style="margin-top:14px">Bonjour ${esc(S.user.name)}</h1><p class="lead">Quel est votre niveau en crypto ? Nous adaptons vos recommandations.</p><div style="margin-top:14px">`+
 Object.keys(LV).map(k=>`<button class="lv" aria-pressed="${cur===k}" onclick="S.tmp='${k}';render()"><div class="bd">${bars(LV[k].n,cur===k)}</div><div><b>${LV[k].t}</b><small>${LV[k].d}</small></div></button>`).join("")+
-`</div><button class="btn b1 gbtn" ${cur?"":"disabled"} onclick="S.level=S.tmp;S.tmp=null;save();go('home')" style="margin-top:8px">Continuer</button><p class="mut" style="font-size:13px;text-align:center;margin-top:14px">Aucun contenu n'est bloqué. Vous pourrez changer de niveau dans Profil.</p></div>`}
+`</div><button class="btn b1 gbtn" ${cur?"":"disabled"} onclick="S.level=S.tmp;S.tmp=null;save();render()" style="margin-top:8px">Continuer</button><p class="mut" style="font-size:13px;text-align:center;margin-top:14px">Aucun contenu n'est bloqué. Vous pourrez changer de niveau dans Profil.</p></div>`}
 
 function render(){
  const gate=!S.user&&!S.preview,onb=!!S.user&&!S.level;
@@ -648,9 +668,10 @@ function render(){
  if(unsub){unsub();unsub=null}
  if(gate){$("#app").innerHTML=gateView();return}
  if(onb){$("#app").innerHTML=levelView();return}
+ if(!!S.user&&!S.plansSeen&&typeof plansView==="function"){document.body.classList.add("plain");$("#app").innerHTML=plansView(true);return}
  const w=$("#who");if(w){if(S.user){w.className="who";w.textContent=(S.user.name||"?").charAt(0).toUpperCase();w.onclick=()=>go('account')}else{w.className="who ghostp";w.textContent="Se connecter";w.onclick=()=>{S.preview=false;save();render()}}}
  $("#nav").innerHTML=NAV.map(([k,i,l])=>`<button onclick="go('${k}')" ${(view===k||(['mod','quiz','premium'].includes(view)&&k==='free'))?'aria-current="true"':''}><b>${SVG[k]||i}</b>${l}</button>`).join("");
- const V={home,free,mod,quiz,premium,secu,chat,coaching,account,legal};$("#app").innerHTML=(V[view]||home)();
+ const V={home,free,mod,quiz,premium,secu,chat,coaching,account,legal,plans:()=>plansView(false)};$("#app").innerHTML=(V[view]||home)();
  if(view==='mod')watch(arg);if(view==='coaching')reqs();
 }
 
@@ -667,7 +688,7 @@ function HERO(done,next,lv){const src=(document.querySelector(".brand img")||{})
 <h2 class="t">Le chemin des pionniers</h2>
 <p class="s">${done?"Reprenez votre parcours, pas à pas, à votre rythme.":"Apprenez les cryptomonnaies pas à pas, en sécurité et sans promesse de gain."}</p>
 <button class="cta" onclick="go('mod','${next}')">${done?"Continuer":"Commencer"} <span aria-hidden="true">→</span></button>
-<div class="chips"><span>8 modules gratuits</span><span>Quiz</span><span>Assistant IA</span><span>Niveau ${lv.t}</span></div></section>`}
+<div class="chips"><span>8 modules gratuits</span><span>Quiz</span><span>Assistant Premium</span><span>Niveau ${lv.t}</span></div></section>`}
 function home(){const lv=LV[S.level||"debutant"],total=MODS.reduce((a,m)=>a+m.lessons.length,0),done=MODS.reduce((a,m)=>a+m.lessons.filter((_,i)=>S.done[m.id+i]).length,0),p=Math.round(done/total*100);
  const name=S.user?S.user.name:(S.pseudo||""),hello=(new Date().getHours()<18?"Bonjour":"Bonsoir")+(name?", "+esc(name):"")+" !";
  const next=lv.recs.find(id=>pct(findMod(m=>m.id===id))<100)||lv.recs[0],quizN=MODS.filter(m=>S.quiz[m.id]!=null).length;
@@ -736,10 +757,11 @@ async function sendChat(pre){const inp=$("#cin"),box=$("#cmsgs");if(!box||chBusy
  window.scrollTo(0,document.body.scrollHeight);
  let out=null;
  try{const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),70000);
-  const r=await fetch(CHAT_API,{method:"POST",headers:{"Content-Type":"application/json"},signal:ctl.signal,body:JSON.stringify({level:S.level||"debutant",messages:CH.filter(m=>!m.err).slice(-8).map(m=>({role:m.role,content:m.content}))})});
+  const r=await fetch(CHAT_API,{method:"POST",headers:Object.assign({"Content-Type":"application/json",Authorization:"Bearer "+(S.session||"")},entH()),signal:ctl.signal,body:JSON.stringify({level:S.level||"debutant",messages:CH.filter(m=>!m.err).slice(-8).map(m=>({role:m.role,content:m.content}))})});
   clearTimeout(to);const d=await r.json().catch(()=>({}));
   if(r.ok&&d.reply)out={role:"assistant",content:d.reply};
   else if(d.error==="not_configured")out={role:"assistant",err:1,content:"L'assistant n'est pas encore activé : la clé du service IA n'a pas été ajoutée côté serveur."};
+  else if(r.status===401||r.status===403||d.error==="premium_required"||d.error==="no_session")out={role:"assistant",err:1,content:"L'assistant est réservé aux abonnés Premium. Ouvrez la page des plans pour vous abonner."};
   else if(r.status===429)out={role:"assistant",err:1,content:"Trop de questions pour le moment. Patientez une minute, puis réessayez."};
   else out={role:"assistant",err:1,content:"L'assistant est momentanément indisponible. Réessayez dans un instant."}}
  catch(e){out={role:"assistant",err:1,content:"Impossible de joindre l'assistant. Vérifiez votre connexion et réessayez."}}
@@ -1145,6 +1167,29 @@ account=function(){
 try{SUGG.push("Qu'est-ce qu'un stablecoin ?","Comment fonctionne une blockchain ?","Quels sont les risques du trading ?","C'est quoi le phishing ?")}catch(e){}
 var _chat=chat;
 chat=function(){return _chat()+'<div class="xs"><h2>Bien poser sa question</h2><div class="chk7">'+["Soyez précis : « comment protéger ma phrase secrète ? » plutôt que « sécurité ».","Indiquez votre niveau : l'assistant adapte son vocabulaire.","Posez une question à la fois pour une réponse plus claire.","Vérifiez toujours les informations importantes sur une source officielle."].map(function(t,i){return '<p><span>'+(i+1)+'.</span>'+t+'</p>'}).join('')+'</div></div>'};
+/* ===== v12 : page des plans (gratuit / Premium) et assistant IA réservé à Premium ===== */
+function plansView(onboarding){
+ if(!PLAN&&!PLANERR)loadPlan();
+ const open=!!(PLAN&&PLAN.open&&PLAN.plans&&PLAN.plans[0]),pl=open?PLAN.plans[0]:null,act=subActive()||!!(S.user&&S.user.admin);
+ const price=pl?String(pl.amount).replace(".",",")+" Pi":"",
+ free=MODS.map(m=>'<li>'+esc(m.t)+'</li>').join(""),
+ prem=PREM.map(t=>'<li>'+esc(t)+'</li>').join("");
+ const skip="S.plansSeen=true;save();go('home')";
+ return '<div class="pl">'+(onboarding?'<span class="tag gold" style="align-self:flex-start">Étape 3 sur 3</span>':'<button class="back" onclick="go(\'home\')">‹ Accueil</button>')+
+ '<h1>Choisissez votre plan</h1><p class="lead">Commencez gratuitement. Passez à Premium quand vous voulez approfondir.</p>'+
+ '<section class="plc plf"><h2>Gratuit</h2><p class="plp"><b>0 Pi</b></p><p class="mut">Les bases pour comprendre la crypto, sans limite de durée.</p><ul class="pll">'+free+'</ul><p class="pls">8 modules, leçons, quiz et espace de commentaires.</p>'+
+ '<button class="btn b4" style="width:100%" onclick="'+(onboarding?skip:"go(\'free\')")+'">'+(onboarding?"Continuer gratuitement":"Voir les formations")+'</button></section>'+
+ '<section class="plc plp2"><span class="plb">Recommandé pour aller plus loin</span><h2>Premium</h2><p class="plp"><b>'+(open?price:"Bientôt ouvert")+'</b>'+(open?' <small>pour '+pl.days+' jours, sans prélèvement automatique</small>':'')+'</p>'+
+ '<ul class="pll"><li><b>Assistant IA</b> : posez vos questions à tout moment, il s\'adapte à votre niveau</li><li><b>Parcours Premium</b> :</li></ul><ul class="pll pls2">'+prem+'</ul>'+
+ '<p class="pls">Tout le plan gratuit reste inclus. Contenu éducatif : aucun gain n\'est promis.</p>'+
+ (act?'<button class="btn b1" style="width:100%" onclick="'+(onboarding?"S.plansSeen=true;save();":"")+'go(\'premium\')">Premium actif · Ouvrir</button>':
+ '<button class="btn b1" style="width:100%" onclick="'+(onboarding?"S.plansSeen=true;save();":"")+'go(\'premium\')">'+(open?"Passer à Premium · "+price:"Voir Premium")+'</button>')+
+ '</section>'+(onboarding?'':'')+'</div>'}
+function chatLocked(){return phead(SVG.chat,"Assistant IA","Inclus dans le plan Premium")+'<div class="card pl-lock"><h3>Réservé aux abonnés Premium</h3><p class="mut" style="margin:8px 0 14px">'+(S.user?"Abonnez-vous pour poser vos questions à l\'assistant. Les formations gratuites restent accessibles à tout moment.":"Connectez-vous avec Pi, puis abonnez-vous pour utiliser l\'assistant.")+'</p><button class="btn b1" style="width:100%" onclick="go(\'plans\')">Comparer les plans</button></div>'}
+window.plansView=plansView;
+var _chat2=chat;
+chat=function(){return (S.user&&(S.user.admin||subActive()))?_chat2():chatLocked()};
+
 render();
 })();
 </script>

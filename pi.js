@@ -241,4 +241,12 @@ async function handle(req, res, url, h) {
   }
   h.send(res, 404, { error: "not_found" }); return true;
 }
-module.exports = { handle };
+// Porte d'entrée de l'assistant IA : réservé aux administrateurs et aux abonnés Premium (vérifié ici, jamais par le navigateur).
+async function premiumGate(req) {
+  const s = readSession(req.headers.authorization);
+  if (!s) return { ok: false, status: 401, error: "no_session" };
+  if (isAdmin(s)) return { ok: true };
+  const a = await access(s, req.headers["x-entitlement"]);
+  return a.active ? { ok: true } : { ok: false, status: 403, error: "premium_required" };
+}
+module.exports = { handle, premiumGate };

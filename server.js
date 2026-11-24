@@ -97,6 +97,9 @@ http.createServer(async (req, res) => {
   if (!cors(req, res)) return send(res, 403, { error: "origin_refused" });
   if (req.method === "OPTIONS") { res.writeHead(204); return res.end(); }
   if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });
+  // L'assistant IA est réservé au plan Premium : session valide + abonnement actif (ou administrateur).
+  const gate = await pi.premiumGate(req);
+  if (!gate.ok) return send(res, gate.status, { error: gate.error });
   if (!process.env.ANTHROPIC_API_KEY && !process.env.GEMINI_API_KEY) return send(res, 503, { error: "not_configured" });
 
   const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "?").split(",")[0].trim();
