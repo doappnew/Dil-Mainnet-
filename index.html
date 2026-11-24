@@ -362,6 +362,57 @@ html,body{overflow-x:hidden;max-width:100%}.lesson{max-width:100%;overflow-wrap:
 .pl-lock{text-align:center;padding:24px 18px}
 .pl button:focus-visible{outline:3px solid #D4AF37;outline-offset:2px}
 </style>
+<style>
+/* ===== v13 : allégé ===== */
+body{font-size:15px;line-height:1.5}
+main h1,.phead h1{font-size:22px;line-height:1.2;letter-spacing:-.01em;font-weight:700}
+main h2{font-size:16px;font-weight:700;margin:26px 0 10px;letter-spacing:0}
+main h3{font-size:15px;font-weight:600}
+.mut,small{font-size:13px}
+.tag,.tag.gold{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;color:#8a6d10!important;font-size:12px!important;font-weight:600!important}
+.card,.card.prem,.note,.warn{box-shadow:none!important;background:#fff!important;border:1px solid #dbe9f4!important;border-radius:14px!important}
+.note{background:transparent!important;border:0!important;padding:0!important;color:#5c6b77}
+.card.prem{background:#fff!important}
+.phead{background:none!important;box-shadow:none!important;padding:0!important;gap:10px}
+.phead .ico{width:36px!important;height:36px!important;border-radius:10px!important;background:#fff!important;box-shadow:none!important}
+.seg{background:none!important;box-shadow:none!important;padding:0!important;gap:18px;border-bottom:1px solid #dbe9f4;border-radius:0!important}
+.seg .btn{background:none!important;box-shadow:none!important;border-radius:0!important;padding:8px 0!important;font-size:15px!important;color:#6B7C88!important}
+.seg .btn.b4{color:#111!important;border-bottom:2px solid #D4AF37!important}
+.tk{margin-top:6px}
+header .brand{padding:3px 8px 3px 3px!important;border:0!important;background:none!important;box-shadow:none!important;overflow:visible}
+header .brand::before,header .brand::after{display:none!important}
+header .brand img{width:36px!important;height:36px!important}
+header .brand span{font-size:18px!important}
+header{border-radius:0!important;box-shadow:0 1px 0 #dbe9f4!important}
+.tabs{transition:transform .25s ease}
+body.navhide .tabs{transform:translateY(160%)}
+.h13 h1{font-size:26px;margin:6px 0 14px}
+.hp .hpt{display:flex;justify-content:space-between;font-size:13px;color:#5c6b77;margin-bottom:6px}.hp .hpt b{color:#111}
+.hpb{height:5px;border-radius:3px;background:#dbe9f4;overflow:hidden}.hpb i{display:block;height:100%;background:#D4AF37;border-radius:3px}
+.hcta{width:100%;margin-top:16px;text-align:left;font-size:15px!important;padding:14px 16px!important}
+.lns{display:flex;flex-direction:column;border-top:1px solid #dbe9f4}
+.ln{display:flex;align-items:center;gap:12px;background:none;border:0;border-bottom:1px solid #dbe9f4;padding:13px 2px;text-align:left;cursor:pointer;color:inherit;font:inherit;width:100%}
+.ln .lk{width:28px;height:28px;border-radius:8px;background:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.ln .lb{flex:1;display:flex;flex-direction:column}.ln .lb b{font-weight:600;font-size:15px}.ln .lb small{color:#6B7C88}
+.ln i{font-style:normal;color:#9aa8b3;font-size:20px}
+.ln:focus-visible{outline:3px solid #D4AF37;outline-offset:-2px}
+.fct{font-size:14px;color:#44525d;margin:14px 0 0}
+.h13 .tr{font-size:12px;margin-top:26px}
+.h13 .faq{margin-top:8px}
+.pask{position:fixed;inset:0;background:rgba(10,15,25,.5);display:grid;place-items:center;z-index:50;padding:20px}
+.pbox{background:#fff;border-radius:18px;padding:24px 20px;max-width:360px;width:100%}
+.pbox h2{margin:0 0 8px;font-size:20px}.pbox p{margin:0 0 16px;color:#5c6b77}
+.grid.c2>.card:not(.prem) .ico,.grid.c2>.card:not(.prem) .tag{display:none!important}
+.grid.c2>.card:not(.prem){padding:14px!important;width:100%}
+.grid.c2>.card:not(.prem) .mut{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px!important}
+.grid.c2>.card:not(.prem) h3{margin:0 0 4px!important;font-size:16px}
+.grid.c2>.card:not(.prem) .prog{margin:10px 0 4px}
+.card.prem .tag{display:none!important}
+.card.prem{padding:12px 14px!important;display:block;width:100%}
+.card.prem h3{margin:0 0 2px!important}
+.grid.c2{grid-template-columns:1fr!important;gap:8px!important}
+@media (prefers-reduced-motion:reduce){.tabs{transition:none}}
+</style>
 </head>
 <body>
 <header><div class="bar">
@@ -820,7 +871,7 @@ function startTicker(){if(tkTimer){clearInterval(tkTimer);tkTimer=null}const t=d
  ["touchstart","mousedown","wheel"].forEach(e=>t.addEventListener(e,()=>{pause=Date.now()+8000},{passive:true}));
  tkTimer=setInterval(()=>{if(Date.now()<pause||!document.getElementById("tkt"))return;const n=(idx+1)%cards.length,e=cards[n];t.scrollTo({left:e.offsetLeft-(t.clientWidth-e.offsetWidth)/2,behavior:"smooth"})},3200)}
 const _render6=render;
-render=function(){_render6();if(document.body.classList.contains("plain")||view==="mod"||view==="quiz"||view==="legal"){if(tkTimer){clearInterval(tkTimer);tkTimer=null}return}const a=document.getElementById("app");if(a&&!document.getElementById("tk")){a.insertAdjacentHTML("afterbegin",tickerHTML());startTicker();loadPrices()}};
+render=function(){_render6();if(document.body.classList.contains("plain")||view==="mod"||view==="quiz"||view==="legal"||view!=="home"){if(tkTimer){clearInterval(tkTimer);tkTimer=null}return}const a=document.getElementById("app");if(a&&!document.getElementById("tk")){a.insertAdjacentHTML("afterbegin",tickerHTML());startTicker();loadPrices()}};
 
 /* ===== v10 : abonnement Premium payé en Pi (accès de 30 jours, renouvelable à la main, sans prélèvement automatique) ===== */
 let payBusy=false,PLAN=null,PLANERR=false,PLANLOAD=false,SYNCED=false;
@@ -1189,6 +1240,32 @@ function chatLocked(){return phead(SVG.chat,"Assistant IA","Inclus dans le plan 
 window.plansView=plansView;
 var _chat2=chat;
 chat=function(){return (S.user&&(S.user.admin||subActive()))?_chat2():chatLocked()};
+
+/* ===== v13 : design allégé, accueil simplifié, barre qui se cache, message Premium ===== */
+(function(){
+ var _h=home;
+ home=function(){
+  var lv=LV[S.level||"debutant"],total=MODS.reduce(function(a,m){return a+m.lessons.length},0),done=MODS.reduce(function(a,m){return a+m.lessons.filter(function(_,i){return S.done[m.id+i]}).length},0),p=Math.round(done/total*100);
+  var name=S.user?S.user.name:(S.pseudo||""),next=lv.recs.find(function(id){return pct(findMod(function(m){return m.id===id}))<100})||lv.recs[0];
+  var nm=findMod(function(m){return m.id===next}),q=QZ[day()%QZ.length],f=FACTS[day()%FACTS.length];
+  var recs=lv.recs.map(function(id){var m=findMod(function(x){return x.id===id});return '<button class="ln" onclick="go(\'mod\',\''+id+'\')"><span class="lk">'+id+'</span><span class="lb"><b>'+m.t+'</b><small>'+m.lessons.length+' leçons · '+pct(m)+' %</small></span><i aria-hidden="true">›</i></button>'}).join("");
+  var ex=[["premium","Premium","Parcours avancés et assistant IA"],["chat","Assistant IA","Inclus dans Premium"],["coaching","Coaching","Un accompagnement personnalisé"],["secu","Sécurité","Vos réflexes contre les arnaques"]].map(function(g){return '<button class="ln" onclick="go(\''+g[0]+'\')"><span class="lb"><b>'+g[1]+'</b><small>'+g[2]+'</small></span><i aria-hidden="true">›</i></button>'}).join("");
+  return '<section class="h13"><h1>'+(new Date().getHours()<18?"Bonjour":"Bonsoir")+(name?", "+esc(name):"")+'</h1>'+
+  '<div class="hp"><div class="hpt"><span>'+done+' sur '+total+' leçons terminées</span><b>'+p+' %</b></div><div class="hpb"><i style="width:'+p+'%"></i></div></div>'+
+  '<button class="btn b1 hcta" onclick="go(\'mod\',\''+next+'\')">'+(done?"Continuer":"Commencer")+' : '+nm.t+'</button>'+
+  '<h2>Pour vous</h2><div class="lns">'+recs+'</div>'+
+  '<h2>Quiz du jour</h2><div class="qz" id="dilqz" data-a="'+q.a+'"><h3>'+q.q+'</h3>'+q.o.map(function(o,j){return '<button class="qo" onclick="dilQz('+j+')">'+o+'</button>'}).join('')+'<p class="qe">'+q.e+'</p></div>'+
+  '<p class="fct"><b>Le saviez-vous ?</b> '+f+'</p>'+
+  '<h2>Explorer</h2><div class="lns">'+ex+'</div>'+
+  '<h2>Pour aller plus loin</h2><div class="faq"><details><summary>Les 7 réflexes de sécurité</summary><div class="chk7">'+SEC7.map(function(t,i){return '<p><span>'+(i+1)+'.</span>'+t+'</p>'}).join('')+'</div></details></div>'+det(GLOS).replace('<div class="faq">','<div class="faq"><details><summary>Mini-glossaire</summary><div class="gl">').replace(/<\/div>$/,'</div></details></div>').replace(/<\/details><details>/g,'</details><details>')+
+  '<div class="faq"><details><summary>Questions fréquentes</summary>'+det(FAQ)+'</details></div>'+
+  '<p class="mut tr">Formateur : Agossou G. Donatien, coach et formateur en cryptomonnaies. Formation éducative : aucun rendement promis, aucune gestion de vos fonds.</p></section>'};
+ var _p=premium;
+ premium=function(){var h=_p();if(!unlocked()){h=h.replace(/onclick="go\('mod','P\d+'\)"/g,'onclick="premAsk()"').replace(/<div class="card prem">/g,'<div class="card prem" onclick="premAsk()" style="cursor:pointer">').replace(/🔒 Réservé aux abonnés Premium/g,'🔒 Passez à Premium').replace(/🔒 Contenu en préparation/g,'🔒 Passez à Premium')}return h};
+ window.premAsk=function(){if(document.getElementById("pask"))return;var d=document.createElement("div");d.id="pask";d.className="pask";d.innerHTML='<div class="pbox" role="dialog" aria-modal="true" aria-labelledby="ptt"><h2 id="ptt">Passez à la version Premium</h2><p>Ce parcours est réservé aux abonnés Premium. L\'abonnement se paie en Pi, sans prélèvement automatique.</p><button class="btn b1" id="pgo" style="width:100%">Voir les plans</button><button class="btn bg" id="pno" style="width:100%;margin-top:8px">Plus tard</button></div>';document.body.appendChild(d);var x=function(){d.remove()};d.onclick=function(e){if(e.target===d)x()};document.getElementById("pno").onclick=x;document.getElementById("pgo").onclick=function(){x();go("plans")};document.getElementById("pgo").focus()};
+ var _lk=lockedView;lockedView=function(){return '<button class="back" onclick="go(\'premium\')">‹ Premium</button><div class="card pl-lock"><h2>Passez à la version Premium</h2><p class="mut" style="margin:8px 0 14px">Ce parcours est réservé aux abonnés Premium.</p><button class="btn b1" style="width:100%" onclick="go(\'plans\')">Voir les plans</button></div>'};
+ var t=null;window.addEventListener("scroll",function(){document.body.classList.add("navhide");clearTimeout(t);t=setTimeout(function(){document.body.classList.remove("navhide")},450)},{passive:true});
+})();
 
 render();
 })();
