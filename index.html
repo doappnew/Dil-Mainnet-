@@ -296,7 +296,7 @@ header .brand small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;fo
 .h2logo .disc{box-shadow:0 10px 26px rgba(40,90,140,.28),inset 0 -6px 14px rgba(212,175,55,.22)}
 </style>
 <style id="home3">
-body{background:linear-gradient(180deg,#9BCFF5 0%,#C4E4FA 22%,#E3F3FE 55%,#F1F9FF 100%) fixed!important}
+body{background:linear-gradient(180deg,#7EC0F2 0%,#AFD9F8 22%,#D6ECFD 55%,#EAF5FE 100%) fixed!important}
 .hello{margin:10px 2px 14px;font-size:27px;line-height:1.15;font-weight:800;letter-spacing:-.5px;color:#0B1230}
 .hello span{color:#9B7410}
 .hc2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -379,11 +379,11 @@ main h3{font-size:15px;font-weight:600}
 .seg .btn{background:none!important;box-shadow:none!important;border-radius:0!important;padding:8px 0!important;font-size:15px!important;color:#6B7C88!important}
 .seg .btn.b4{color:#111!important;border-bottom:2px solid #D4AF37!important}
 .tk{margin-top:6px}
-header .brand{padding:3px 8px 3px 3px!important;border:0!important;background:none!important;box-shadow:none!important;overflow:visible}
-header .brand::before,header .brand::after{display:none!important}
-header .brand img{width:36px!important;height:36px!important}
-header .brand span{font-size:18px!important}
-header{border-radius:0!important;box-shadow:0 1px 0 #dbe9f4!important}
+body:not(.ishome) header .brand{padding:3px 8px 3px 3px!important;border:0!important;background:none!important;box-shadow:none!important;overflow:visible}
+body:not(.ishome) header .brand::before,header .brand::after{display:none!important}
+body:not(.ishome) header .brand img{width:36px!important;height:36px!important}
+body:not(.ishome) header .brand span{font-size:18px!important}
+body:not(.ishome) header{border-radius:0!important;box-shadow:0 1px 0 #dbe9f4!important}
 .tabs{transition:transform .25s ease}
 body.navhide .tabs{transform:translateY(160%)}
 .h13 h1{font-size:26px;margin:6px 0 14px}
@@ -411,6 +411,17 @@ body.navhide .tabs{transform:translateY(160%)}
 .card.prem{padding:12px 14px!important;display:block;width:100%}
 .card.prem h3{margin:0 0 2px!important}
 .grid.c2{grid-template-columns:1fr!important;gap:8px!important}
+.g13{align-items:center;text-align:center;justify-content:center;gap:0;padding:28px 28px 24px}
+.g13 .gsp{display:none}
+.gt13{font-size:27px;line-height:1.15;font-weight:700;letter-spacing:-.02em;color:#0f2740;margin:22px 0 6px}
+.gs13{font-size:15px;color:#4b6178;margin:0 0 26px}
+.gl13{list-style:none;margin:0 0 28px;padding:0;width:100%;max-width:330px;text-align:left;border-top:1px solid rgba(15,39,64,.12)}
+.gl13 li{padding:12px 0 12px 26px;border-bottom:1px solid rgba(15,39,64,.12);font-size:14.5px;color:#1c3550;position:relative;line-height:1.4}
+.gl13 li::before{content:"";position:absolute;left:4px;top:50%;width:9px;height:5px;border-left:2px solid #B8921E;border-bottom:2px solid #B8921E;transform:translateY(-70%) rotate(-45deg)}
+.g13 .gbtn{width:100%;max-width:330px}
+.gf13{font-size:12px;color:#5c6f82;max-width:330px;margin:22px 0 0;line-height:1.5}
+.plain,.plain body{background:#EAF5FE!important}
+.gate.g13{background:radial-gradient(90% 40% at 50% 0%,rgba(126,192,242,.55),transparent),radial-gradient(80% 30% at 50% 100%,rgba(212,175,55,.14),transparent)}
 @media (prefers-reduced-motion:reduce){.tabs{transition:none}}
 </style>
 </head>
@@ -1250,9 +1261,9 @@ chat=function(){return (S.user&&(S.user.admin||subActive()))?_chat2():chatLocked
   var nm=findMod(function(m){return m.id===next}),q=QZ[day()%QZ.length],f=FACTS[day()%FACTS.length];
   var recs=lv.recs.map(function(id){var m=findMod(function(x){return x.id===id});return '<button class="ln" onclick="go(\'mod\',\''+id+'\')"><span class="lk">'+id+'</span><span class="lb"><b>'+m.t+'</b><small>'+m.lessons.length+' leçons · '+pct(m)+' %</small></span><i aria-hidden="true">›</i></button>'}).join("");
   var ex=[["premium","Premium","Parcours avancés et assistant IA"],["chat","Assistant IA","Inclus dans Premium"],["coaching","Coaching","Un accompagnement personnalisé"],["secu","Sécurité","Vos réflexes contre les arnaques"]].map(function(g){return '<button class="ln" onclick="go(\''+g[0]+'\')"><span class="lb"><b>'+g[1]+'</b><small>'+g[2]+'</small></span><i aria-hidden="true">›</i></button>'}).join("");
-  return '<section class="h13"><h1>'+(new Date().getHours()<18?"Bonjour":"Bonsoir")+(name?", "+esc(name):"")+'</h1>'+
-  '<div class="hp"><div class="hpt"><span>'+done+' sur '+total+' leçons terminées</span><b>'+p+' %</b></div><div class="hpb"><i style="width:'+p+'%"></i></div></div>'+
-  '<button class="btn b1 hcta" onclick="go(\'mod\',\''+next+'\')">'+(done?"Continuer":"Commencer")+' : '+nm.t+'</button>'+
+  var quizN=MODS.filter(function(m){return S.quiz[m.id]!=null}).length;
+  return '<section class="h13"><p class="hello">'+(new Date().getHours()<18?"Bonjour":"Bonsoir")+(name?",<br><span>"+esc(name)+"</span> !":" !")+'</p>'+HOMEX(done,total,p,next,quizN,lv)+
+  '<div class="wide"><h3>Protégez-vous des arnaques</h3><button class="pill gd" onclick="go(\'secu\')">Mon bilan <span aria-hidden="true">↗</span></button></div>'+
   '<h2>Pour vous</h2><div class="lns">'+recs+'</div>'+
   '<h2>Quiz du jour</h2><div class="qz" id="dilqz" data-a="'+q.a+'"><h3>'+q.q+'</h3>'+q.o.map(function(o,j){return '<button class="qo" onclick="dilQz('+j+')">'+o+'</button>'}).join('')+'<p class="qe">'+q.e+'</p></div>'+
   '<p class="fct"><b>Le saviez-vous ?</b> '+f+'</p>'+
@@ -1260,6 +1271,13 @@ chat=function(){return (S.user&&(S.user.admin||subActive()))?_chat2():chatLocked
   '<h2>Pour aller plus loin</h2><div class="faq"><details><summary>Les 7 réflexes de sécurité</summary><div class="chk7">'+SEC7.map(function(t,i){return '<p><span>'+(i+1)+'.</span>'+t+'</p>'}).join('')+'</div></details></div>'+det(GLOS).replace('<div class="faq">','<div class="faq"><details><summary>Mini-glossaire</summary><div class="gl">').replace(/<\/div>$/,'</div></details></div>').replace(/<\/details><details>/g,'</details><details>')+
   '<div class="faq"><details><summary>Questions fréquentes</summary>'+det(FAQ)+'</details></div>'+
   '<p class="mut tr">Formateur : Agossou G. Donatien, coach et formateur en cryptomonnaies. Formation éducative : aucun rendement promis, aucune gestion de vos fonds.</p></section>'};
+ gateView=function(){return '<div class="gate g13"><div class="h2logo"><div class="halo"></div><div class="ring"></div><div class="disc"><img src="'+logoSrc()+'" alt="Logo DIL"></div><div class="orb" aria-hidden="true"><i>₿</i><i>Ξ</i><i>$</i></div></div>'+
+ '<h1 class="gt13">Bienvenue sur DIL</h1><p class="gs13">Votre école de cryptomonnaies, pas à pas.</p>'+
+ '<ul class="gl13"><li>Formations gratuites et quiz</li><li>Un parcours adapté à votre niveau</li><li>Aucun mot de passe : votre phrase secrète n\'est jamais demandée</li></ul>'+
+ '<button id="gbtn" class="btn b1 gbtn" onclick="piLogin()">'+GBTN+'</button><div id="gerr" class="gerr" role="alert"></div>'+
+ (IN_PI?"":'<button class="gsub" onclick="S.preview=true;save();go(\'home\')">Voir un aperçu (hors Pi Browser)</button>')+
+ '<p class="gf13">DIL n\'est ni développée, ni approuvée par l\'équipe centrale de Pi Network. Contenu éducatif, pas un conseil financier.</p></div>'};
+ var _r13=render;render=function(){document.body.classList.toggle("ishome",view==="home");_r13()};
  var _p=premium;
  premium=function(){var h=_p();if(!unlocked()){h=h.replace(/onclick="go\('mod','P\d+'\)"/g,'onclick="premAsk()"').replace(/<div class="card prem">/g,'<div class="card prem" onclick="premAsk()" style="cursor:pointer">').replace(/🔒 Réservé aux abonnés Premium/g,'🔒 Passez à Premium').replace(/🔒 Contenu en préparation/g,'🔒 Passez à Premium')}return h};
  window.premAsk=function(){if(document.getElementById("pask"))return;var d=document.createElement("div");d.id="pask";d.className="pask";d.innerHTML='<div class="pbox" role="dialog" aria-modal="true" aria-labelledby="ptt"><h2 id="ptt">Passez à la version Premium</h2><p>Ce parcours est réservé aux abonnés Premium. L\'abonnement se paie en Pi, sans prélèvement automatique.</p><button class="btn b1" id="pgo" style="width:100%">Voir les plans</button><button class="btn bg" id="pno" style="width:100%;margin-top:8px">Plus tard</button></div>';document.body.appendChild(d);var x=function(){d.remove()};d.onclick=function(e){if(e.target===d)x()};document.getElementById("pno").onclick=x;document.getElementById("pgo").onclick=function(){x();go("plans")};document.getElementById("pgo").focus()};
