@@ -4,7 +4,7 @@ const http = require("http");
 const pi = require("./pi");
 
 const PORT = process.env.PORT || 3000;
-const ORIGINS = (process.env.ALLOWED_ORIGINS || "https://dil-digital-learning.onrender.com").split(",").map((s) => s.trim()).filter(Boolean);
+const ORIGINS = (process.env.ALLOWED_ORIGINS || "https://dil-pioneers.onrender.com").split(",").map((s) => s.trim()).filter(Boolean);
 const DAILY_CAP = Number(process.env.DAILY_CAP || 500);
 const ANTHROPIC_URL = (process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com").replace(/\/$/, "");
 const GEMINI_URL = (process.env.GEMINI_BASE_URL || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
@@ -42,7 +42,7 @@ function cors(req, res) {
     res.setHeader("Access-Control-Allow-Origin", o);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Entitlement");
     return true;
   }
   return !o; // appel sans Origin (test serveur) : accepté ; origine inconnue : refusée

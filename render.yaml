@@ -22,6 +22,8 @@ services:
         sync: false
       - key: PI_API_KEY
         sync: false
+      - key: PREMIUM_PRICE_PI
+        sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: GEMINI_API_KEY

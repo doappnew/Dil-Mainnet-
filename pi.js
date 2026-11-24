@@ -1,4 +1,4 @@
-// Routes Pi Network de DIL : vérification de la connexion et reprise des paiements inachevés.
+// Routes Pi Network de DIL : connexion, paiements en Pi (abonnement Premium) et reprise des paiements inachevés.
 // Aucune dépendance. Variables : PI_API_KEY (paiements), SESSION_SECRET (signature des sessions), PI_API_BASE (tests).
 const crypto = require("crypto");
 const premium = require("./premium");
@@ -29,9 +29,44 @@ function readSession(h) {
 }
 
 // Catalogue des produits : le prix est fixé ICI, par le serveur, jamais par le navigateur.
-const CATALOG = { test: { amount: 0.1, memo: "DIL - paiement de test (Testnet)" } };
+// Abonnement Premium : accès de 30 jours payé en Pi, renouvelable à la main (aucun prélèvement automatique).
+// Le prix est fixé par le formateur dans la variable PREMIUM_PRICE_PI (Render). Sans prix, l'abonnement reste fermé.
+const SUB_DAYS = 30, DAY = 24 * 3600 * 1000;
+const subPrice = () => { const n = Number(String(process.env.PREMIUM_PRICE_PI || "").replace(",", ".")); return Number.isFinite(n) && n > 0 && n <= 10000 ? Math.round(n * 1e7) / 1e7 : 0; };
+const productFor = (key) => (key === "premium_month" && subPrice() > 0 ? { amount: subPrice(), memo: "DIL - Premium " + SUB_DAYS + " jours", days: SUB_DAYS } : null);
 const sameAmt = (a, b) => Math.abs(Number(a) - Number(b)) < 1e-9;
 function makeReceipt(o) { const p = b64(JSON.stringify(Object.assign({ t: "receipt", at: Date.now() }, o))); return p + "." + mac(p); }
+
+// Droit d'accès Premium : jeton signé par le serveur {uid, date de fin, derniers paiements}. Aucune base de données :
+// l'appareil le conserve et le renvoie à chaque ouverture d'un parcours ; le serveur le revérifie à chaque fois.
+const entMac = (p) => crypto.createHmac("sha256", SECRET).update("ent." + p).digest("base64url");
+function makeEnt(o) { const p = b64(JSON.stringify({ t: "ent", uid: o.uid, exp: o.exp, pids: o.pids.slice(-12) })); return p + "." + entMac(p); }
+function readEnt(tok, uid) {
+  if (typeof tok !== "string" || tok.length > 2000) return null;
+  const [p, s] = tok.split("."); if (!p || !s) return null;
+  const a = Buffer.from(entMac(p)), b = Buffer.from(s);
+  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+  try { const d = JSON.parse(Buffer.from(p, "base64url").toString()); return d.t === "ent" && d.uid === uid && Number.isFinite(d.exp) && Array.isArray(d.pids) ? d : null; } catch { return null; }
+}
+const entActive = (d) => !!d && d.exp > Date.now();
+// fresh=true : seulement à la première validation d'un paiement par le serveur (ajoute 30 jours, à la suite des jours restants).
+// fresh=false : on ne fait que retrouver un droit déjà acquis (paiement déjà validé) ; aucune prolongation.
+function grant(uid, tok, payId, payment, fresh) {
+  const old = readEnt(tok, uid);
+  if (old && old.pids.includes(payId)) return old;
+  if (!fresh) {
+    if (old) return old;
+    const created = Date.parse(payment && payment.created_at);
+    if (!Number.isFinite(created)) return null;
+    const exp = created + SUB_DAYS * DAY;
+    return exp > Date.now() ? { uid, exp, pids: [payId] } : null;
+  }
+  const now = Date.now();
+  const start = old && old.exp > now ? old.exp : now;
+  return { uid, exp: start + SUB_DAYS * DAY, pids: ((old && old.pids) || []).concat(payId) };
+}
+const entOut = (e) => (e ? { entitlement: makeEnt(e), exp: e.exp } : {});
+const isSubPay = (p) => !!(p && p.metadata && p.metadata.product === "premium_month");
 
 async function piFetch(path, opts) {
   const r = await fetch(PI_API + path, Object.assign({ signal: AbortSignal.timeout(15000) }, opts));
@@ -48,7 +83,7 @@ async function readBody(req, send, res) {
 
 // Retourne true si la route a été traitée.
 async function handle(req, res, url, h) {
-  if (!url.startsWith("/api/auth/") && url !== "/api/me" && !url.startsWith("/api/payments/") && !url.startsWith("/api/admin/") && !url.startsWith("/api/premium/")) return false;
+  if (!url.startsWith("/api/auth/") && url !== "/api/me" && !url.startsWith("/api/payments/") && !url.startsWith("/api/admin/") && !url.startsWith("/api/premium/") && !url.startsWith("/api/subscription/")) return false;
   if (!h.cors(req, res)) { h.send(res, 403, { error: "origin_refused" }); return true; }
   if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return true; }
   const ip = String(req.headers["x-forwarded-for"] || req.socket.remoteAddress || "?").split(",")[0].trim();
@@ -78,14 +113,26 @@ async function handle(req, res, url, h) {
     return true;
   }
 
-  // Contenu Premium : pour l'instant réservé aux administrateurs (les autres l'obtiendront avec la version officielle).
+  // Contenu Premium : réservé aux administrateurs et aux abonnés dont le droit d'accès signé est encore valide (vérifié ici, jamais par le navigateur).
   if (url.startsWith("/api/premium/") && req.method === "GET") {
     const s = readSession(req.headers.authorization);
     if (!s) { h.send(res, 401, { error: "no_session" }); return true; }
-    if (!isAdmin(s)) { h.send(res, 403, { error: "locked" }); return true; }
+    if (!isAdmin(s) && !entActive(readEnt(req.headers["x-entitlement"], s.uid))) { h.send(res, 403, { error: "locked" }); return true; }
     const r = premium.load(url.slice("/api/premium/".length).split("?")[0]);
     if (r.err) { h.send(res, r.err === "not_found" ? 404 : r.err === "bad_id" ? 400 : 503, { error: r.err }); return true; }
     res.writeHead(200, { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }); res.end(r.data); return true;
+  }
+
+  // Abonnement : tarif proposé et état de l'accès de l'utilisateur.
+  if (url === "/api/subscription/plans" && req.method === "GET") {
+    const price = subPrice();
+    h.send(res, 200, { open: price > 0 && !!process.env.PI_API_KEY, plans: price > 0 ? [{ code: "premium_month", amount: price, days: SUB_DAYS }] : [] }); return true;
+  }
+  if (url === "/api/subscription/me" && req.method === "GET") {
+    const s = readSession(req.headers.authorization);
+    if (!s) { h.send(res, 401, { error: "no_session" }); return true; }
+    const e = readEnt(req.headers["x-entitlement"], s.uid), on = entActive(e);
+    h.send(res, 200, { active: on, exp: e ? e.exp : null, daysLeft: on ? Math.ceil((e.exp - Date.now()) / DAY) : 0, admin: isAdmin(s) }); return true;
   }
 
   // Administration : réservée aux administrateurs, vérifiée à chaque appel par le serveur.
@@ -111,13 +158,14 @@ async function handle(req, res, url, h) {
       const p = g.data;
       if (String(p.user_uid) !== s.uid) { h.send(res, 403, { error: "not_your_payment" }); return true; }
       const st = p.status || {};
-      if (st.developer_completed) { h.send(res, 200, { result: "already_completed" }); return true; }
+      if (st.developer_completed) { h.send(res, 200, Object.assign({ result: "already_completed" }, isSubPay(p) ? entOut(grant(s.uid, req.headers["x-entitlement"], id, p, false)) : {})); return true; }
       if (st.cancelled || st.user_cancelled) { h.send(res, 200, { result: "already_cancelled" }); return true; }
       const txid = p.transaction && p.transaction.txid;
       if (txid) {
         const c = await piFetch("/v2/payments/" + id + "/complete", { method: "POST", headers: keyHeaders(), body: JSON.stringify({ txid }) });
         if (!c.ok) { console.error("payments: complete", c.status, (c.data && c.data.error) || ""); h.send(res, 502, { error: "pi_error" }); return true; }
-        h.send(res, 200, { result: "completed" }); return true;
+        STATS.payments++;
+        h.send(res, 200, Object.assign({ result: "completed" }, isSubPay(p) && st.developer_approved ? entOut(grant(s.uid, req.headers["x-entitlement"], id, p, true)) : {})); return true;
       }
       const c = await piFetch("/v2/payments/" + id + "/cancel", { method: "POST", headers: keyHeaders(), body: "{}" });
       if (!c.ok) { console.error("payments: cancel", c.status, (c.data && c.data.error) || ""); h.send(res, 502, { error: "pi_error" }); return true; }
@@ -138,8 +186,10 @@ async function handle(req, res, url, h) {
       if (!g.ok) { console.error("payments: GET", g.status, (g.data && g.data.error) || ""); h.send(res, 502, { error: "pi_error" }); return true; }
       const p = g.data, st = p.status || {};
       if (String(p.user_uid) !== s.uid) { h.send(res, 403, { error: "not_your_payment" }); return true; }
-      const key = p.metadata && p.metadata.product, prod = typeof key === "string" && Object.prototype.hasOwnProperty.call(CATALOG, key) ? CATALOG[key] : null;
+      const key = p.metadata && p.metadata.product, prod = typeof key === "string" ? productFor(key) : null;
+      if (!prod && key === "premium_month") { h.send(res, 503, { error: "closed" }); return true; }
       if (!prod || !sameAmt(p.amount, prod.amount)) { console.error("payments: produit ou montant refusé", key, p.amount); h.send(res, 400, { error: "bad_product" }); return true; }
+      if (/testnet/i.test(String(p.network || ""))) { console.error("payments: paiement du réseau de test refusé"); h.send(res, 400, { error: "wrong_network" }); return true; }
       if (st.cancelled || st.user_cancelled) { h.send(res, 409, { error: "cancelled" }); return true; }
       if (url === "/api/payments/approve") {
         if (st.developer_approved) { h.send(res, 200, { result: "already_approved" }); return true; }
@@ -150,16 +200,16 @@ async function handle(req, res, url, h) {
       const txid = typeof body.txid === "string" && /^[A-Za-z0-9]{6,128}$/.test(body.txid) ? body.txid : "";
       if (!txid) { h.send(res, 400, { error: "bad_request" }); return true; }
       const ptx = p.transaction && p.transaction.txid;
-      if (st.developer_completed) { h.send(res, 200, { result: "already_completed", receipt: makeReceipt({ uid: s.uid, product: key, paymentId: id, txid: ptx || txid }) }); return true; }
+      if (st.developer_completed) { h.send(res, 200, Object.assign({ result: "already_completed", receipt: makeReceipt({ uid: s.uid, product: key, paymentId: id, txid: ptx || txid }) }, entOut(grant(s.uid, req.headers["x-entitlement"], id, p, false)))); return true; }
       if (!st.developer_approved) { h.send(res, 409, { error: "not_approved" }); return true; }
       if (ptx !== txid) { console.error("payments: txid différent"); h.send(res, 400, { error: "txid_mismatch" }); return true; }
       const c = await piFetch("/v2/payments/" + id + "/complete", { method: "POST", headers: keyHeaders(), body: JSON.stringify({ txid }) });
       if (!c.ok) { console.error("payments: complete", c.status, (c.data && c.data.error) || ""); h.send(res, 502, { error: "pi_error" }); return true; }
       STATS.payments++;
-      h.send(res, 200, { result: "completed", receipt: makeReceipt({ uid: s.uid, product: key, paymentId: id, txid }) });
+      h.send(res, 200, Object.assign({ result: "completed", receipt: makeReceipt({ uid: s.uid, product: key, paymentId: id, txid }) }, entOut(grant(s.uid, req.headers["x-entitlement"], id, p, true))));
     } catch (e) { console.error("payments:", String(e.message).slice(0, 200)); h.send(res, 502, { error: "pi_unreachable" }); }
     return true;
   }
   h.send(res, 404, { error: "not_found" }); return true;
 }
-module.exports = { handle, CATALOG };
+module.exports = { handle };
